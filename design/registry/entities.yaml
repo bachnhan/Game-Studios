@@ -37,7 +37,7 @@
 #   Each entry: name, status, source, referenced_by[], attributes{}, added, revised
 
 version: 1
-last_updated: ""
+last_updated: "2026-05-28"
 
 # ─── ENTITIES ────────────────────────────────────────────────────────────────
 # Named game-world objects: enemies, NPCs, characters, factions, bosses.
@@ -106,7 +106,37 @@ items: []
 #   output_range[min, max], added
 # Optional: expression (the actual formula), notes
 
-formulas: []
+formulas:
+  - name: combat_stat_modifier
+    status: active
+    source: design/gdd/monster-data.md
+    referenced_by:
+      - design/gdd/monster-data.md
+      - design/gdd/battle-engine.md
+    variables:
+      - bond_level
+    output_range: [1.0, 1.25]
+    expression: "1.0 + (bond_level * 0.05)"
+    notes: "Enhances combat stats based on relationship tier."
+    added: 2026-05-28
+    revised: ""
+
+  - name: fatigue_accum
+    status: active
+    source: design/gdd/monster-data.md
+    referenced_by:
+      - design/gdd/monster-data.md
+      - design/gdd/battle-engine.md
+      - design/gdd/camp-manager.md
+      - design/gdd/field-hazards.md
+    variables:
+      - base_cost
+      - bond_level
+    output_range: [0.75 * base_cost, base_cost]
+    expression: "base_cost * (1.0 - (bond_level * 0.05))"
+    notes: "Reduces fatigue accumulation based on bond level."
+    added: 2026-05-28
+    revised: ""
 
 # Example:
 #
@@ -139,7 +169,52 @@ formulas: []
 #
 # Required fields: name, status, source, referenced_by, value, unit, added
 
-constants: []
+constants:
+  - name: max_bond_level
+    status: active
+    source: design/gdd/monster-data.md
+    referenced_by:
+      - design/gdd/monster-data.md
+      - design/gdd/bond-manager.md
+      - design/gdd/talent-tree.md
+    value: 5
+    unit: level
+    added: 2026-05-28
+    revised: ""
+
+  - name: max_fatigue
+    status: active
+    source: design/gdd/monster-data.md
+    referenced_by:
+      - design/gdd/monster-data.md
+      - design/gdd/camp-manager.md
+      - design/gdd/bond-manager.md
+    value: 100
+    unit: fatigue points
+    added: 2026-05-28
+    revised: ""
+
+  - name: combat_round_fatigue_cost
+    status: active
+    source: design/gdd/monster-data.md
+    referenced_by:
+      - design/gdd/monster-data.md
+      - design/gdd/battle-engine.md
+    value: 10
+    unit: fatigue points
+    added: 2026-05-28
+    revised: ""
+
+  - name: field_hazard_fatigue_cost
+    status: active
+    source: design/gdd/monster-data.md
+    referenced_by:
+      - design/gdd/monster-data.md
+      - design/gdd/field-hazards.md
+    value: 5
+    unit: fatigue points
+    added: 2026-05-28
+    revised: ""
 
 # Example:
 #
