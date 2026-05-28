@@ -213,6 +213,16 @@
 | **Alpha** | 2 towns, 2 routes, 3 campsites | 6 monsters, 8 recipes, inventory system | 12 weeks |
 | **Full Vision** | 3 towns, 4 routes, multiple zones | 10+ monsters, full talent tree, polish and sound | 16 - 20 weeks |
 
+## Visual Identity Anchor
+
+**One-line Visual Rule**:  
+> A vibrant GBA-style grid world where every asset conveys warmth, safety, and the active partnership between the traveler and their monsters.
+
+### Supporting Principles
+*   **Cozy Comfort Cues**: Visuals must prioritize feelings of safety, comfort, and warmth over harsh survival realism (e.g., warm, glowing oranges and soft greens).
+*   **Active Partnership**: Monsters are never passive objects or tools; they must be shown actively participating in camp chores or idle tasks.
+*   **Playful Stance Clarity**: Battle sprites and UI must clearly telegraph the current combat stance (Block, Counter-Block, or Brute) so that children can easily read the opponent's intentions.
+
 ---
 
 ## Next Steps

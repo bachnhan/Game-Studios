@@ -1,20 +1,20 @@
 <!-- STATUS -->
 Epic: Hearth & Horn Conception
-Feature: Systems Decomposition
-Task: Systems Design Review & Gate Check
+Feature: Technical Setup
+Task: Create Master Architecture and ADRs
 <!-- /STATUS -->
 
 # Active Session State
 
 ## Current Task
-- **Task**: Systems Design Review & Gate Check
-- **Status**: All 6 MVP Systems Designed
-- **Active File**: [systems-index.md](file:///Users/cation/Game-Studios/design/gdd/systems-index.md)
+- **Task**: Create Master Architecture and ADRs
+- **Status**: Not Started
+- **Active File**: [stage.txt](file:///Users/cation/Game-Studios/production/stage.txt)
 
 ## Current Stage Context
-- **Stage**: Concept
+- **Stage**: Technical Setup
 - **Review Mode**: Lean
 - **Engine**: Godot 4.6.3 (GDScript)
 
 ## Next Action
-- Run design gate checking, then proceed to Phase 3: Technical Setup (Architecture & ADRs)
+- Create the master architecture blueprint (`docs/architecture/architecture.md`) and author initial ADRs (ADR-001, ADR-002, ADR-003).
