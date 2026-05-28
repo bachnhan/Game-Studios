@@ -147,11 +147,11 @@ func _trigger_battle_action() -> void:
 	
 	# Spawn BattleEngine and BattleUI
 	battle_engine = BattleEngine.new()
-	battle_engine.deploy_monsters(active_companions, active_enemies)
+	battle_engine.start_battle(active_companions, active_enemies)
 	
 	battle_ui = BattleUI.new()
 	screen_container.add_child(battle_ui)
-	battle_ui.initialize_ap_display(battle_engine.max_round_ap)
+	battle_ui.initialize_ap_display(battle_engine.current_round_ap)
 	
 	_draw_current_state()
 
@@ -197,9 +197,10 @@ func _render_menu_mode() -> void:
 	vbox.add_child(prompt)
 	
 	# Micro-animation: glow/flash prompt text
-	var tween := create_tween().set_loops()
+	var tween: Tween = create_tween()
 	tween.tween_property(prompt, "modulate:a", 0.3, 0.6)
 	tween.tween_property(prompt, "modulate:a", 1.0, 0.6)
+	tween.set_loops()
 
 # ─── MODE 2: EXPLORATION FIELD GRID ───────────────────────────────────────────
 func _render_exploration_mode() -> void:
@@ -613,7 +614,7 @@ func _handle_battle_keys(keycode: int) -> void:
 			
 	if move_name != "":
 		# Preview spending crystals
-		battle_ui.preview_ap_cost(battle_engine.max_round_ap, ap_cost)
+		battle_ui.preview_ap_cost(battle_engine.current_round_ap, ap_cost)
 		
 		# Resolve a quick battle step!
 		var player_mon := active_companions[0]
