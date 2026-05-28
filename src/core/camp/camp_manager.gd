@@ -18,6 +18,22 @@ var chore_assignments: Dictionary = {
 	"Warder": null
 }
 
+# Recipe Database
+var recipes: Dictionary = {
+	"cozy_berry_stew": {
+		"ingredients": {
+			"berry": 3
+		},
+		"display_name": "Cozy Berry Stew",
+		"is_complex": false
+	}
+}
+
+# Gathering State
+var gatherer_progress: float = 0.0
+var gatherer_target: float = 30.0
+var camp_shelf: Array[String] = []
+
 ## Validates if a monster is eligible for a specific camp role chore.
 ## Fainted monsters (HP == 0) cannot perform chores.
 func _is_valid_role_monster(monster: MonsterData, role: String) -> bool:
@@ -157,3 +173,137 @@ func rest_companions(companions: Array[MonsterData], segments: int) -> void:
 			var hp_restored_per_segment := mon.base_hp * 0.20 * hp_multiplier
 			var total_hp_restored := int(round(segments * hp_restored_per_segment))
 			mon.current_hp = clampi(mon.current_hp + total_hp_restored, 0, mon.base_hp)
+
+## Cooks a recipe using the player's inventory, applying QTE accuracy and active helper efficiencies.
+## Deducts ingredients from the inventory on success.
+## Returns a Dictionary detailing success state and resulting meal quality.
+func cook(recipe_id: String, inventory: Inventory, minigame_accuracy: float, helper: MonsterData = null) -> Dictionary:
+	if not recipe_id in recipes:
+		return {"success": false, "error": "Unknown recipe: " + recipe_id}
+	
+	if inventory == null:
+		return {"success": false, "error": "Inventory not provided"}
+		
+	var recipe: Dictionary = recipes[recipe_id]
+	var ingredients: Dictionary = recipe["ingredients"]
+	
+	# Verify ingredients availability
+	for item_id in ingredients:
+		var qty: int = ingredients[item_id]
+		if not inventory.has_item(item_id, qty):
+			return {"success": false, "error": "Insufficient ingredients for: " + item_id}
+	
+	var is_complex: bool = recipe.get("is_complex", false)
+	
+	# Check campfire fuel for complex recipes
+	if is_complex and campfire_fuel <= 0.0:
+		return {"success": false, "error": "Campfire is cold! Complex recipe failed."}
+	
+	# Determine base efficiency
+	var base_efficiency := 0.8
+	if helper != null:
+		base_efficiency = helper.work_efficiency
+	else:
+		var fire_starter := chore_assignments["Fire-Starter"] as MonsterData
+		if fire_starter != null and _is_valid_role_monster(fire_starter, "Fire-Starter"):
+			base_efficiency = fire_starter.work_efficiency
+	
+	# Compute Quality Score
+	var quality_score := base_efficiency * minigame_accuracy
+	
+	# Capped to Bland Meal if campfire fuel is dead (simple recipes)
+	if not is_complex and campfire_fuel <= 0.0:
+		quality_score = 0.5 # forces Bland Meal
+	
+	var meal_quality := "Bland Meal"
+	if quality_score >= 1.4:
+		meal_quality = "Cozy Masterpiece"
+	elif quality_score >= 1.0:
+		meal_quality = "Good Meal"
+		
+	# Deduct ingredients (transactional)
+	var transaction_success := true
+	for item_id in ingredients:
+		var qty: int = ingredients[item_id]
+		if not inventory.remove_item(item_id, qty):
+			transaction_success = false
+			break
+	
+	if not transaction_success:
+		return {"success": false, "error": "Failed to consume ingredients from inventory"}
+	
+	return {
+		"success": true,
+		"meal_quality": meal_quality,
+		"quality_score": quality_score
+	}
+
+## Feeds a meal of the given quality to a companion monster, recovering fatigue/HP and increasing Bond XP.
+## Fainted monsters can ONLY be revived/fed with a "Cozy Masterpiece".
+func consume_meal(monster: MonsterData, meal_quality: String) -> bool:
+	if monster == null:
+		return false
+	
+	var is_fainted := monster.current_hp == 0
+	if is_fainted and meal_quality != "Cozy Masterpiece":
+		return false
+	
+	match meal_quality:
+		"Bland Meal":
+			monster.apply_fatigue(-20)
+			var hp_restore := int(round(monster.base_hp * 0.10))
+			monster.current_hp = clampi(monster.current_hp + hp_restore, 0, monster.base_hp)
+			monster.bond_xp += 2
+			return true
+		"Good Meal":
+			monster.apply_fatigue(-50)
+			var hp_restore := int(round(monster.base_hp * 0.30))
+			monster.current_hp = clampi(monster.current_hp + hp_restore, 0, monster.base_hp)
+			monster.bond_xp += 5
+			return true
+		"Cozy Masterpiece":
+			monster.apply_fatigue(-100)
+			var hp_restore := int(round(monster.base_hp * 0.50))
+			# Instantly cures fainted state: HP is successfully set to the restored HP level
+			monster.current_hp = clampi(monster.current_hp + hp_restore, 0, monster.base_hp)
+			monster.bond_xp += 15
+			return true
+			
+	return false
+
+## Ticks the gathering chore time progress. If a Gatherer is assigned, compiles progress and finds ingredients.
+## Plops found items into the camp shelf if player inventory is full.
+func tick_gathering(delta: float, inventory: Inventory, item_template: ItemData) -> void:
+	if not is_camp_active:
+		return
+		
+	if item_template == null or inventory == null:
+		return
+	
+	var gatherer := chore_assignments["Gatherer"] as MonsterData
+	if gatherer == null or not _is_valid_role_monster(gatherer, "Gatherer"):
+		return
+		
+	gatherer_progress += delta
+	while gatherer_progress >= gatherer_target:
+		gatherer_progress -= gatherer_target
+		# Attempt to add to inventory
+		var leftovers := inventory.add_item(item_template, 1)
+		if leftovers > 0:
+			# Inventory full, place onto camp shelf
+			camp_shelf.append(item_template.item_id)
+
+## Attempts to claim all items stored on the temporary camp shelf into the player inventory.
+func claim_shelf_items(inventory: Inventory, item_template: ItemData) -> void:
+	if inventory == null or item_template == null:
+		return
+		
+	var remaining_items: Array[String] = []
+	for item_id in camp_shelf:
+		if item_id == item_template.item_id:
+			var leftovers := inventory.add_item(item_template, 1)
+			if leftovers > 0:
+				remaining_items.append(item_id)
+		else:
+			remaining_items.append(item_id)
+	camp_shelf = remaining_items

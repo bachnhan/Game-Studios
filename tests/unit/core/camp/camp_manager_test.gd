@@ -197,3 +197,156 @@ func test_rest_companions_fatigue_and_hp_recovery() -> void:
 	assert_int(worker_mon.fatigue).is_equal(50)
 	assert_int(worker_mon.current_hp).is_equal(20)
 	assert_int(worker_mon.bond_xp).is_equal(10)
+
+func test_cooking_accuracy_and_monster_efficiency_computes_masterpiece() -> void:
+	# Add 5 berries to inventory
+	var item_berry := ItemData.new()
+	item_berry.item_id = "berry"
+	item_berry.display_name = "Sweet Berry"
+	item_berry.category = "Ingredient"
+	item_berry.max_stack = 99
+	
+	var leftovers := inventory.add_item(item_berry, 5)
+	assert_int(leftovers).is_equal(0)
+	
+	# Helper monster with efficiency 1.0
+	var helper := MonsterData.new()
+	helper.current_hp = 50
+	helper.work_efficiency = 1.0
+	
+	# 1. Cook with perfect accuracy (1.5) -> quality_score = 1.0 * 1.5 = 1.5 -> Cozy Masterpiece
+	var result := manager.cook("cozy_berry_stew", inventory, 1.5, helper)
+	assert_bool(result["success"]).is_true()
+	assert_str(result["meal_quality"]).is_equal("Cozy Masterpiece")
+	assert_float(result["quality_score"]).is_equal(1.5)
+	assert_bool(inventory.has_item("berry", 3)).is_false() # 3 berries consumed (2 left)
+	
+	# 2. Cook with good accuracy (1.2) -> quality_score = 1.0 * 1.2 = 1.2 -> Good Meal
+	inventory.add_item(item_berry, 3) # add back to cook again
+	result = manager.cook("cozy_berry_stew", inventory, 1.2, helper)
+	assert_bool(result["success"]).is_true()
+	assert_str(result["meal_quality"]).is_equal("Good Meal")
+	assert_float(result["quality_score"]).is_equal(1.2)
+	
+	# 3. Cook with poor accuracy (0.5) -> quality_score = 1.0 * 0.5 = 0.5 -> Bland Meal
+	inventory.add_item(item_berry, 3)
+	result = manager.cook("cozy_berry_stew", inventory, 0.5, helper)
+	assert_bool(result["success"]).is_true()
+	assert_str(result["meal_quality"]).is_equal("Bland Meal")
+	assert_float(result["quality_score"]).is_equal(0.5)
+
+func test_cooking_bland_meal_when_fuel_zero() -> void:
+	var item_berry := ItemData.new()
+	item_berry.item_id = "berry"
+	item_berry.display_name = "Sweet Berry"
+	item_berry.category = "Ingredient"
+	item_berry.max_stack = 99
+	inventory.add_item(item_berry, 5)
+	
+	var helper := MonsterData.new()
+	helper.current_hp = 50
+	helper.work_efficiency = 1.0
+	
+	# Empty fuel
+	manager.campfire_fuel = 0.0
+	
+	# Cooking simple recipe when cold always results in Bland Meal (score forced to 0.5)
+	var result := manager.cook("cozy_berry_stew", inventory, 1.5, helper)
+	assert_bool(result["success"]).is_true()
+	assert_str(result["meal_quality"]).is_equal("Bland Meal")
+
+func test_consume_meal_applies_hp_fatigue_and_bond_xp() -> void:
+	var monster := MonsterData.new()
+	monster.base_hp = 100
+	monster.current_hp = 10
+	monster.fatigue = 80
+	monster.bond_xp = 0
+	
+	# Bland Meal: -20 fatigue, +10% base_hp (10 HP), +2 Bond XP
+	var success := manager.consume_meal(monster, "Bland Meal")
+	assert_bool(success).is_true()
+	assert_int(monster.fatigue).is_equal(60)
+	assert_int(monster.current_hp).is_equal(20)
+	assert_int(monster.bond_xp).is_equal(2)
+	
+	# Good Meal: -50 fatigue, +30% base_hp (30 HP), +5 Bond XP
+	success = manager.consume_meal(monster, "Good Meal")
+	assert_bool(success).is_true()
+	assert_int(monster.fatigue).is_equal(10)
+	assert_int(monster.current_hp).is_equal(50)
+	assert_int(monster.bond_xp).is_equal(7)
+
+func test_consume_meal_fainted_monster_locks() -> void:
+	var fainted := MonsterData.new()
+	fainted.base_hp = 100
+	fainted.current_hp = 0
+	fainted.fatigue = 80
+	fainted.bond_xp = 0
+	
+	# Bland and Good meals are rejected for fainted monsters
+	var success := manager.consume_meal(fainted, "Bland Meal")
+	assert_bool(success).is_false()
+	assert_int(fainted.current_hp).is_equal(0)
+	
+	success = manager.consume_meal(fainted, "Good Meal")
+	assert_bool(success).is_false()
+	assert_int(fainted.current_hp).is_equal(0)
+	
+	# Cozy Masterpiece successfully revives them (+50% base_hp, -100 fatigue, +15 Bond XP)
+	success = manager.consume_meal(fainted, "Cozy Masterpiece")
+	assert_bool(success).is_true()
+	assert_int(fainted.current_hp).is_equal(50)
+	assert_int(fainted.fatigue).is_equal(0)
+	assert_int(fainted.bond_xp).is_equal(15)
+
+func test_gatherer_ticks_and_shelves_items_when_bag_full() -> void:
+	# Enable camp
+	manager.is_camp_active = true
+	
+	var item_berry := ItemData.new()
+	item_berry.item_id = "berry"
+	item_berry.display_name = "Sweet Berry"
+	item_berry.category = "Ingredient"
+	item_berry.max_stack = 99
+	
+	# Create and assign a valid Gatherer
+	var gatherer := MonsterData.new()
+	gatherer.current_hp = 50
+	gatherer.elemental_type = "Grass"
+	var success := manager.assign_chore(gatherer, "Gatherer")
+	assert_bool(success).is_true()
+	
+	# Set target time to 10 seconds for easier testing
+	manager.gatherer_target = 10.0
+	
+	# Tick progress by 8.0s -> no items spawned yet
+	manager.tick_gathering(8.0, inventory, item_berry)
+	assert_float(manager.gatherer_progress).is_equal(8.0)
+	assert_bool(inventory.has_item("berry")).is_false()
+	
+	# Tick by another 4.0s (total 12.0s) -> 1 item spawned, progress wraps to 2.0s
+	manager.tick_gathering(4.0, inventory, item_berry)
+	assert_float(manager.gatherer_progress).is_equal(2.0)
+	assert_bool(inventory.has_item("berry", 1)).is_true()
+	assert_int(manager.camp_shelf.size()).is_equal(0)
+	
+	# Make inventory completely full by using slot limit (we'll set max_slots to 1)
+	inventory.max_slots = 1
+	# The slot already has 1 berry. Let's fill the stack to its max limit (max stack is 99, but let's change max_stack to 1 for this test)
+	item_berry.max_stack = 1
+	
+	# Now, inventory has 1 item, slot is full, and max slots is 1. Inventory is completely full!
+	# Tick by another 10.0 seconds -> should spawn item, fail to insert to inventory, and append to camp shelf!
+	manager.tick_gathering(10.0, inventory, item_berry)
+	assert_float(manager.gatherer_progress).is_equal(2.0)
+	assert_int(manager.camp_shelf.size()).is_equal(1)
+	assert_str(manager.camp_shelf[0]).is_equal("berry")
+	
+	# Clear inventory space (increase slots to 2)
+	inventory.max_slots = 2
+	
+	# Claim items from camp shelf
+	manager.claim_shelf_items(inventory, item_berry)
+	assert_int(manager.camp_shelf.size()).is_equal(0)
+	assert_bool(inventory.has_item("berry", 2)).is_true()
+
