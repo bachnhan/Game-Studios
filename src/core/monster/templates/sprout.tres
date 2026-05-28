@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="MonsterData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/core/monster/monster_data.gd" id="1_sprout"]
+
+[resource]
+script = ExtResource("1_sprout")
+monster_id = "sprout"
+display_name = "Sprout"
+monster_race = "Forest Sprout"
+elemental_type = "Grass"
+base_hp = 60
+base_attack = 12
+base_defense = 8
+base_speed = 1
+camp_role = "Gatherer"
+work_efficiency = 1.0
