@@ -3,11 +3,13 @@ class_name CampManagerTest
 extends GdUnitTestSuite
 
 # Test double for GridMapContext to stub map layout.
-class TestMapContext extends GridMapContext:
+class TestMapContext:
+	extends GridMapContext
 	var campsite_tiles: Array[Vector2i] = []
 	
 	func is_campsite(coords: Vector2i) -> bool:
 		return coords in campsite_tiles
+
 
 var player: GridPlayer
 var map: TestMapContext

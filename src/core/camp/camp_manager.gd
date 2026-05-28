@@ -68,7 +68,7 @@ func tick_fuel(delta: float) -> void:
 	if fire_starter != null and _is_valid_role_monster(fire_starter, "Fire-Starter"):
 		burn_rate = 1.0 / 1.2
 	
-	campfire_fuel = clampf(campfire_fuel - delta * burn_rate, 0.0, max_fuel_capacity)
+	campfire_fuel = clamp(campfire_fuel - delta * burn_rate, 0.0, max_fuel_capacity)
 
 ## Stokes the fire by consuming exactly 1 wood item from the player's inventory.
 ## Resets fuel to 100% (max capacity) on success.
@@ -132,7 +132,7 @@ func rest_companions(companions: Array[MonsterData], segments: int) -> void:
 	var base_rate := 25.0
 	
 	var fatigue_restored_per_segment := base_rate * fire_multiplier * ward_multiplier
-	var total_fatigue_restored := int(roundf(segments * fatigue_restored_per_segment))
+	var total_fatigue_restored := int(round(segments * fatigue_restored_per_segment))
 	
 	for mon in companions:
 		if mon == null:
@@ -155,5 +155,5 @@ func rest_companions(companions: Array[MonsterData], segments: int) -> void:
 			# Restore HP: baseline 20% of base_hp per segment, accelerated 1.5x by Water-Purifier helper
 			var hp_multiplier := 1.5 if has_purifier else 1.0
 			var hp_restored_per_segment := mon.base_hp * 0.20 * hp_multiplier
-			var total_hp_restored := int(roundf(segments * hp_restored_per_segment))
+			var total_hp_restored := int(round(segments * hp_restored_per_segment))
 			mon.current_hp = clampi(mon.current_hp + total_hp_restored, 0, mon.base_hp)
