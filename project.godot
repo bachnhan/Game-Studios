@@ -13,7 +13,6 @@ config_version=5
 config/name="Hearth & Horn"
 config/features=PackedStringArray("4.6", "Mobile")
 run/main_scene="res://src/presentation/main_menu/MainMenu.tscn"
-config/icon="res://icon.svg"
 
 [display]
 
