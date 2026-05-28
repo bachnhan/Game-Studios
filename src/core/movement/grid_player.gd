@@ -14,9 +14,20 @@ signal bump_triggered(position: Vector2i, direction: Vector2i)
 ## Signal emitted when the character initiates a ledge hop.
 signal ledge_hopped(start_position: Vector2i, end_position: Vector2i)
 
+## Signal emitted when a grass encounter check is performed.
+signal encounter_checked(steps: int, chance: float)
+
+## Signal emitted when a wild monster battle encounter is triggered.
+signal encounter_triggered()
+
 const TILE_SIZE: int = 16
 const MOVE_SPEED: float = 64.0
 const TURN_TAP_THRESHOLD: float = 0.10
+
+# Grass encounter tuning constants
+const MIN_SAFE_STEPS: int = 5
+const ENCOUNTER_ACCUMULATOR: float = 0.05
+const MAX_ENCOUNTER_CHANCE: float = 0.35
 
 enum State { IDLE, TURNING, MOVING, LEDGE_HOPPING, BLOCKED, INTERACTING }
 
@@ -39,6 +50,10 @@ var map_context: GridMapContext
 # Test mode hooks to simulate key presses without OS input
 var is_test_mode: bool = false
 var test_input: Vector2i = Vector2i.ZERO
+
+# Grass encounter runtime state
+var steps_in_grass: int = 0
+var test_roll_value: float = -1.0
 
 func _ready() -> void:
 	# Synchronize visual Node2D position with grid coordinates on start
@@ -120,7 +135,9 @@ func _handle_moving_state(delta: float) -> void:
 	if move_percent >= 1.0:
 		grid_position = target_position
 		emit_signal("moved", grid_position)
-		_on_step_completed()
+		_check_grass_encounter()
+		if current_state != State.INTERACTING:
+			_on_step_completed()
 
 func _handle_ledge_hopping_state(delta: float) -> void:
 	step_timer += delta
@@ -140,7 +157,9 @@ func _handle_ledge_hopping_state(delta: float) -> void:
 		grid_position = target_position
 		position = Vector2(grid_position * TILE_SIZE)
 		emit_signal("moved", grid_position)
-		current_state = State.IDLE
+		_check_grass_encounter()
+		if current_state != State.INTERACTING:
+			current_state = State.IDLE
 
 func _handle_blocked_state(delta: float) -> void:
 	step_timer += delta
@@ -220,3 +239,28 @@ func _get_input_direction() -> Vector2i:
 	if Input.is_action_pressed("ui_up"):
 		return Vector2i(0, -1)
 	return Vector2i.ZERO
+
+func _check_grass_encounter() -> void:
+	if map_context != null and map_context.is_grass(grid_position):
+		steps_in_grass += 1
+		_roll_grass_encounter()
+	else:
+		steps_in_grass = 0
+
+func _roll_grass_encounter() -> void:
+	if steps_in_grass < MIN_SAFE_STEPS:
+		return
+	
+	var chance := (steps_in_grass - MIN_SAFE_STEPS) * ENCOUNTER_ACCUMULATOR
+	chance = min(chance, MAX_ENCOUNTER_CHANCE)
+	
+	emit_signal("encounter_checked", steps_in_grass, chance)
+	
+	var roll := randf()
+	if test_roll_value >= 0.0:
+		roll = test_roll_value
+		
+	if roll < chance:
+		current_state = State.INTERACTING
+		emit_signal("encounter_triggered")
+		steps_in_grass = 0
