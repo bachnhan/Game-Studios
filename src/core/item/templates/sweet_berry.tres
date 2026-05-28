@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/core/item/item_data.gd" id="1_sweet_berry"]
+
+[resource]
+script = ExtResource("1_sweet_berry")
+item_id = "berry"
+display_name = "Sweet Berry"
+description = "A plump, juicy berry found along the route. Perfect for cooking stews."
+category = "Ingredient"
+max_stack = 10
+weight = 0.1
+camp_value = 10.0

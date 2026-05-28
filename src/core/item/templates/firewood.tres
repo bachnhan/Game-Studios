@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/core/item/item_data.gd" id="1_firewood"]
+
+[resource]
+script = ExtResource("1_firewood")
+item_id = "wood"
+display_name = "Firewood"
+description = "Dry logs suitable for keeping the campfire stoked."
+category = "Fuel"
+max_stack = 99
+weight = 1.0
+camp_value = 25.0
