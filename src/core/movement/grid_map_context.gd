@@ -16,3 +16,8 @@ func is_ledge(_coords: Vector2i, _direction: Vector2i) -> bool:
 ## Returns true if the coordinate is tall grass.
 func is_grass(_coords: Vector2i) -> bool:
 	return false
+
+## Returns true if the coordinate is a campsite tile.
+func is_campsite(_coords: Vector2i) -> bool:
+	return false
+

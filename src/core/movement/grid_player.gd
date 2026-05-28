@@ -20,6 +20,9 @@ signal encounter_checked(steps: int, chance: float)
 ## Signal emitted when a wild monster battle encounter is triggered.
 signal encounter_triggered()
 
+## Signal emitted when a camp pitch is triggered.
+signal camp_pitched_triggered()
+
 const TILE_SIZE: int = 16
 const MOVE_SPEED: float = 64.0
 const TURN_TAP_THRESHOLD: float = 0.10
@@ -50,6 +53,7 @@ var map_context: GridMapContext
 # Test mode hooks to simulate key presses without OS input
 var is_test_mode: bool = false
 var test_input: Vector2i = Vector2i.ZERO
+var test_interact_pressed: bool = false
 
 # Grass encounter runtime state
 var steps_in_grass: int = 0
@@ -75,6 +79,21 @@ func _process(delta: float) -> void:
 			pass
 
 func _handle_idle_state(_delta: float) -> void:
+	# 0. Check for interact input on campsite tiles
+	var interact_pressed: bool = false
+	if is_test_mode:
+		interact_pressed = test_interact_pressed
+	else:
+		interact_pressed = Input.is_action_just_pressed("ui_accept")
+	
+	if interact_pressed:
+		if map_context != null and map_context.has_method("is_campsite") and map_context.is_campsite(grid_position):
+			current_state = State.INTERACTING
+			emit_signal("camp_pitched_triggered")
+			if is_test_mode:
+				test_interact_pressed = false
+			return
+
 	# 1. Process buffered input if available
 	var next_input := buffered_input
 	buffered_input = Vector2i.ZERO
