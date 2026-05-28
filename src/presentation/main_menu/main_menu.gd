@@ -196,11 +196,8 @@ func _render_menu_mode() -> void:
 	prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	vbox.add_child(prompt)
 	
-	# Micro-animation: glow/flash prompt text
-	var tween: Tween = create_tween()
-	tween.tween_property(prompt, "modulate:a", 0.3, 0.6)
-	tween.tween_property(prompt, "modulate:a", 1.0, 0.6)
-	tween.set_loops()
+	# Prompt text remains static for stable rendering
+
 
 # ─── MODE 2: EXPLORATION FIELD GRID ───────────────────────────────────────────
 func _render_exploration_mode() -> void:
@@ -594,6 +591,9 @@ func _resolve_cooking_qte() -> void:
 	_draw_current_state()
 
 func _handle_battle_keys(keycode: int) -> void:
+	if battle_ui == null or not is_instance_valid(battle_ui) or battle_engine == null:
+		return
+		
 	var move_name := ""
 	var ap_cost := 0
 	var stance_type := ""
@@ -617,8 +617,8 @@ func _handle_battle_keys(keycode: int) -> void:
 		battle_ui.preview_ap_cost(battle_engine.current_round_ap, ap_cost)
 		
 		# Resolve a quick battle step!
-		var player_mon := active_companions[0]
-		var enemy_mon := active_enemies[0]
+		var player_mon: MonsterData = active_companions[0] as MonsterData
+		var enemy_mon: MonsterData = active_enemies[0] as MonsterData
 		
 		# Update active stance icons
 		battle_ui.update_stance_icon(0, stance_type)
@@ -627,6 +627,9 @@ func _handle_battle_keys(keycode: int) -> void:
 		# Await brief delay and execute action logic
 		var timer := get_tree().create_timer(0.4)
 		timer.timeout.connect(func():
+			if battle_ui == null or not is_instance_valid(battle_ui):
+				return
+				
 			var damage := 0
 			var popup_text := ""
 			
@@ -644,23 +647,25 @@ func _handle_battle_keys(keycode: int) -> void:
 				enemy_mon.apply_damage(damage)
 				
 			# Spawn impact popup above enemy position
-			var alert := battle_ui.spawn_feedback_popup(popup_text, Vector2(140, 40))
+			var alert: Label = battle_ui.spawn_feedback_popup(popup_text, Vector2(140, 40))
 			screen_container.add_child(alert)
 			
 			# Animate HP bars
-			var tween := battle_ui.update_hp(1, enemy_mon.current_hp, enemy_mon.base_hp)
+			var tween: Tween = battle_ui.update_hp(1, enemy_mon.current_hp, enemy_mon.base_hp)
 			
 			# Check win trigger
 			if enemy_mon.current_hp <= 0:
 				tween.finished.connect(func():
 					current_mode = GameMode.EXPLORATION
-					battle_ui.queue_free()
+					if is_instance_valid(battle_ui):
+						battle_ui.queue_free()
+					battle_ui = null
 					_draw_current_state()
 				)
 			else:
 				# Enemy counter-attacks player!
 				player_mon.apply_damage(10)
-				var p_tween := battle_ui.update_hp(0, player_mon.current_hp, player_mon.base_hp)
+				var p_tween: Tween = battle_ui.update_hp(0, player_mon.current_hp, player_mon.base_hp)
 				p_tween.finished.connect(func():
 					_draw_current_state()
 				)
