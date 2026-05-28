@@ -1,20 +1,20 @@
 <!-- STATUS -->
 Epic: Hearth & Horn Conception
-Feature: Technical Setup
-Task: Create Master Architecture and ADRs
+Feature: Sprint 01 - Foundation and Grid Navigation
+Task: Implement Monster Resources (Story-001)
 <!-- /STATUS -->
 
 # Active Session State
 
 ## Current Task
-- **Task**: Create Master Architecture and ADRs
+- **Task**: Implement Story-001: Monster Resources
 - **Status**: Not Started
-- **Active File**: [stage.txt](file:///Users/cation/Game-Studios/production/stage.txt)
+- **Active File**: [story-001-monster-resources.md](file:///Users/cation/Game-Studios/production/epics/foundation/story-001-monster-resources.md)
 
 ## Current Stage Context
-- **Stage**: Technical Setup
+- **Stage**: Production
 - **Review Mode**: Lean
 - **Engine**: Godot 4.6.3 (GDScript)
 
 ## Next Action
-- Create the master architecture blueprint (`docs/architecture/architecture.md`) and author initial ADRs (ADR-001, ADR-002, ADR-003).
+- Scaffolding the `MonsterData` custom resource class and implementing the `.duplicate()` factory method wrapper.
