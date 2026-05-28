@@ -148,7 +148,7 @@ func execute_round() -> void:
 		# Calculate damage (Formula 2)
 		var damage := 0
 		if stance_mult > 0.0:
-			var defender_def := max(1, target.base_defense)
+			var defender_def: int = int(max(1, target.base_defense))
 			var stat_ratio := float(actor.base_attack) / float(defender_def)
 			var bond_modifier := 1.0 + float(actor.bond_level) * 0.05
 			damage = int(round(float(move.base_power) * stat_ratio * stance_mult * bond_modifier))
