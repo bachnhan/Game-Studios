@@ -1,13 +1,13 @@
 <!-- STATUS -->
 Epic: Hearth & Horn Conception
 Feature: Systems Decomposition
-Task: Designing GridMovement GDD
+Task: Designing BattleEngine GDD
 <!-- /STATUS -->
 
 # Active Session State
 
 ## Current Task
-- **Task**: Designing GridMovement GDD
+- **Task**: Designing BattleEngine GDD
 - **Status**: Not Started
 - **Active File**: [systems-index.md](file:///Users/cation/Game-Studios/design/gdd/systems-index.md)
 
@@ -17,4 +17,4 @@ Task: Designing GridMovement GDD
 - **Engine**: Godot 4.6.3 (GDScript)
 
 ## Next Action
-- Design the third MVP system: `GridMovement` (use `/design-system GridMovement`)
+- Design the fourth MVP system: `BattleEngine` (use `/design-system BattleEngine`)

@@ -164,6 +164,23 @@ formulas:
     added: 2026-05-28
     revised: ""
 
+  - name: tall_grass_encounter_chance
+    status: active
+    source: design/gdd/grid-movement.md
+    referenced_by:
+      - design/gdd/grid-movement.md
+      - design/gdd/battle-engine.md
+    variables:
+      - steps_in_grass
+      - MIN_SAFE_STEPS
+      - ENCOUNTER_ACCUMULATOR
+      - MAX_ENCOUNTER_CHANCE
+    output_range: [0.0, 0.35]
+    expression: "clamp((steps_in_grass - MIN_SAFE_STEPS) * ENCOUNTER_ACCUMULATOR, 0.0, MAX_ENCOUNTER_CHANCE)"
+    notes: "Calculates wild combat spawn probability based on grass steps."
+    added: 2026-05-28
+    revised: ""
+
 # Example:
 #
 # formulas:
@@ -262,6 +279,49 @@ constants:
       - design/gdd/save-manager.md
     value: 99
     unit: items per stack
+    added: 2026-05-28
+    revised: ""
+
+  - name: tile_size
+    status: active
+    source: design/gdd/grid-movement.md
+    referenced_by:
+      - design/gdd/grid-movement.md
+      - design/gdd/ui.md
+      - design/art/art-bible.md
+    value: 16
+    unit: pixels
+    added: 2026-05-28
+    revised: ""
+
+  - name: move_speed
+    status: active
+    source: design/gdd/grid-movement.md
+    referenced_by:
+      - design/gdd/grid-movement.md
+    value: 64.0
+    unit: pixels per second
+    added: 2026-05-28
+    revised: ""
+
+  - name: min_safe_steps
+    status: active
+    source: design/gdd/grid-movement.md
+    referenced_by:
+      - design/gdd/grid-movement.md
+      - design/gdd/battle-engine.md
+    value: 5
+    unit: steps
+    added: 2026-05-28
+    revised: ""
+
+  - name: max_encounter_chance
+    status: active
+    source: design/gdd/grid-movement.md
+    referenced_by:
+      - design/gdd/grid-movement.md
+    value: 0.35
+    unit: probability
     added: 2026-05-28
     revised: ""
 
