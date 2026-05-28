@@ -11,7 +11,7 @@ var move_brute: BattleMove
 var move_block: BattleMove
 var move_counter: BattleMove
 
-func before_each() -> void:
+func before_test() -> void:
 	engine = BattleEngine.new()
 	
 	# Set up moves
@@ -39,14 +39,9 @@ func before_each() -> void:
 	player_party.clear()
 	enemy_party.clear()
 
-func after_each() -> void:
-	engine.free()
-	for mon in player_party:
-		if is_instance_valid(mon):
-			mon.free()
-	for mon in enemy_party:
-		if is_instance_valid(mon):
-			mon.free()
+func after_test() -> void:
+	player_party.clear()
+	enemy_party.clear()
 
 func _create_test_monster(p_id: String, p_speed: int, p_hp: int = 50, p_atk: int = 10, p_def: int = 10) -> MonsterData:
 	var template := MonsterData.new()
@@ -106,20 +101,20 @@ func test_battle_engine_resolves_brute_vs_block_deals_zero() -> void:
 	engine.allocate_player_action(p1, move_brute, e1)
 	engine.allocate_enemy_action(e1, move_block, p1)
 	
-	var was_blocked := false
-	var final_damage := -1
+	var was_blocked := [false]
+	var final_damage := [-1]
 	engine.action_resolved.connect(func(actor, move, target, damage, is_blocked, is_countered):
 		if actor == p1:
-			final_damage = damage
-			was_blocked = is_blocked
+			final_damage[0] = damage
+			was_blocked[0] = is_blocked
 	)
 	
 	# Act
 	engine.execute_round()
 	
 	# Assert
-	assert_int(final_damage).is_equal(0)
-	assert_bool(was_blocked).is_true()
+	assert_int(final_damage[0]).is_equal(0)
+	assert_bool(was_blocked[0]).is_true()
 
 func test_battle_engine_resolves_counter_vs_block_deals_double() -> void:
 	# Arrange - Player ATK = 10, Enemy DEF = 10 (base_power 15)
@@ -136,20 +131,20 @@ func test_battle_engine_resolves_counter_vs_block_deals_double() -> void:
 	engine.allocate_player_action(p1, move_counter, e1)
 	engine.allocate_enemy_action(e1, move_block, p1)
 	
-	var was_countered := false
-	var final_damage := -1
+	var was_countered := [false]
+	var final_damage := [-1]
 	engine.action_resolved.connect(func(actor, move, target, damage, is_blocked, is_countered):
 		if actor == p1:
-			final_damage = damage
-			was_countered = is_countered
+			final_damage[0] = damage
+			was_countered[0] = is_countered
 	)
 	
 	# Act
 	engine.execute_round()
 	
 	# Assert
-	assert_int(final_damage).is_equal(30)
-	assert_bool(was_countered).is_true()
+	assert_int(final_damage[0]).is_equal(30)
+	assert_bool(was_countered[0]).is_true()
 
 func test_battle_engine_resolves_counter_vs_brute_deals_zero() -> void:
 	# Arrange
@@ -164,17 +159,17 @@ func test_battle_engine_resolves_counter_vs_brute_deals_zero() -> void:
 	engine.allocate_player_action(p1, move_counter, e1)
 	engine.allocate_enemy_action(e1, move_brute, p1)
 	
-	var final_damage := -1
+	var final_damage := [-1]
 	engine.action_resolved.connect(func(actor, move, target, damage, is_blocked, is_countered):
 		if actor == p1:
-			final_damage = damage
+			final_damage[0] = damage
 	)
 	
 	# Act
 	engine.execute_round()
 	
 	# Assert - Misses entirely since target is not blocking
-	assert_int(final_damage).is_equal(0)
+	assert_int(final_damage[0]).is_equal(0)
 
 func test_battle_engine_sorts_resolution_order_by_speed() -> void:
 	# Arrange - Player speed 3, Enemy speed 1
@@ -210,15 +205,15 @@ func test_battle_engine_triggers_defeat_on_party_fainted() -> void:
 	engine.start_battle(player_party, enemy_party)
 	
 	# Enemy Tackle deals 20 * (20/10) = 40 damage (exceeds player 20 HP)
-	engine.allocate_player_action(p1, move_block, e1) # Idle block
+	engine.allocate_player_action(p1, move_brute, e1)
 	engine.allocate_enemy_action(e1, move_brute, p1)
 	
-	var lost_emitted := false
-	engine.battle_lost.connect(func(): lost_emitted = true)
+	var lost_emitted := [false]
+	engine.battle_lost.connect(func(): lost_emitted[0] = true)
 	
 	# Act
 	engine.execute_round()
 	
 	# Assert
 	assert_int(p1.current_hp).is_equal(0)
-	assert_bool(lost_emitted).is_true()
+	assert_bool(lost_emitted[0]).is_true()

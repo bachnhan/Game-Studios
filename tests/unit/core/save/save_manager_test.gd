@@ -8,7 +8,7 @@ var item_wood: ItemData
 var item_berry: ItemData
 var monster_sprout: MonsterData
 
-func before_each() -> void:
+func before_test() -> void:
 	save_manager = SaveManager.new()
 	
 	# Set up item templates and register them
@@ -34,9 +34,8 @@ func before_each() -> void:
 	# Ensure no legacy save file interferes on start
 	_cleanup_save_file()
 
-func after_each() -> void:
+func after_test() -> void:
 	_cleanup_save_file()
-	save_manager.free()
 
 func _cleanup_save_file() -> void:
 	if FileAccess.file_exists(SaveManager.SAVE_PATH):
@@ -96,9 +95,9 @@ func test_load_game_restores_full_state() -> void:
 	
 	# Verify player state
 	assert_int(loaded_pos_wrapper.size()).is_equal(1)
-	assert_str(loaded_pos_wrapper[0]).is_equal(saved_pos)
+	assert_str(str(loaded_pos_wrapper[0])).is_equal(str(saved_pos))
 	assert_int(loaded_dir_wrapper.size()).is_equal(1)
-	assert_str(loaded_dir_wrapper[0]).is_equal(saved_dir)
+	assert_str(str(loaded_dir_wrapper[0])).is_equal(str(saved_dir))
 	
 	# Verify inventory state
 	assert_int(loaded_inventory.slots.size()).is_equal(2)

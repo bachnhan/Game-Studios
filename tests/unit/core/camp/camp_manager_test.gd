@@ -17,7 +17,7 @@ var manager: CampManager
 var inventory: Inventory
 var item_wood: ItemData
 
-func before_each() -> void:
+func before_test() -> void:
 	player = GridPlayer.new()
 	map = TestMapContext.new()
 	player.map_context = map
@@ -35,12 +35,9 @@ func before_each() -> void:
 	item_wood.category = "Fuel"
 	item_wood.max_stack = 99
 
-func after_each() -> void:
-	player.free()
-	map.free()
-	manager.free()
-	inventory.free()
-	item_wood.free()
+func after_test() -> void:
+	if player != null:
+		player.free()
 
 func test_pitch_camp_only_on_campsite_tile() -> void:
 	# 1. Coordinate (0, 0) is not a campsite
@@ -95,8 +92,6 @@ func test_tick_fuel_decreases_over_time_and_fire_starter_slows_decay() -> void:
 	# Decays at 1/1.2 rate: 12 seconds tick -> decays exactly 10 seconds
 	manager.tick_fuel(12.0)
 	assert_float(manager.campfire_fuel).is_equal(100.0)
-	
-	monster.free()
 
 func test_assign_chore_locks_fainted_validates_roles_prevents_double() -> void:
 	# Fainted monster cannot be assigned
@@ -126,15 +121,10 @@ func test_assign_chore_locks_fainted_validates_roles_prevents_double() -> void:
 	success = manager.assign_chore(fire, "Water-Purifier")
 	assert_bool(success).is_false()
 	
-	# Double-assignment prevention: Assign fire monster to Gatherer (Fire type is not Gatherer type, but defaults to Gatherer camp_role)
 	success = manager.assign_chore(fire, "Gatherer")
 	assert_bool(success).is_true()
 	assert_object(manager.chore_assignments["Gatherer"]).is_equal(fire)
 	assert_object(manager.chore_assignments["Fire-Starter"]).is_null() # unassigned from previous chore
-	
-	fainted.free()
-	grass.free()
-	fire.free()
 
 func test_rest_companions_fatigue_and_hp_recovery() -> void:
 	# Setup campsite active and stoked
@@ -207,10 +197,3 @@ func test_rest_companions_fatigue_and_hp_recovery() -> void:
 	assert_int(worker_mon.fatigue).is_equal(50)
 	assert_int(worker_mon.current_hp).is_equal(20)
 	assert_int(worker_mon.bond_xp).is_equal(10)
-	
-	resting_mon.free()
-	warder_mon.free()
-	resting_mon_2.free()
-	purifier_mon.free()
-	resting_mon_3.free()
-	worker_mon.free()

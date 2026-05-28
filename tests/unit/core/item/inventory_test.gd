@@ -7,7 +7,7 @@ var item_wood: ItemData
 var item_berry: ItemData
 var item_ore: ItemData
 
-func before_each() -> void:
+func before_test() -> void:
 	# Set up test items
 	item_wood = ItemData.new()
 	item_wood.item_id = "wood"

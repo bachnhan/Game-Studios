@@ -73,6 +73,9 @@ func load_game(
 	if err != OK:
 		return false
 	
+	if not config.has_section_key("player", "grid_position"):
+		return false
+	
 	# 1. Load Player State
 	if config.has_section_key("player", "grid_position"):
 		out_player_pos.clear()

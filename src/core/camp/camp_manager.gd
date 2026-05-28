@@ -64,7 +64,7 @@ func tick_fuel(delta: float) -> void:
 		return
 	
 	var burn_rate := 1.0
-	var fire_starter: MonsterData = chore_assignments["Fire-Starter"]
+	var fire_starter := chore_assignments["Fire-Starter"] as MonsterData
 	if fire_starter != null and _is_valid_role_monster(fire_starter, "Fire-Starter"):
 		burn_rate = 1.0 / 1.2
 	
@@ -117,12 +117,12 @@ func rest_companions(companions: Array[MonsterData], segments: int) -> void:
 		return
 	
 	var has_warder := false
-	var warder: MonsterData = chore_assignments["Warder"]
+	var warder := chore_assignments["Warder"] as MonsterData
 	if warder != null and _is_valid_role_monster(warder, "Warder"):
 		has_warder = true
 		
 	var has_purifier := false
-	var purifier: MonsterData = chore_assignments["Water-Purifier"]
+	var purifier := chore_assignments["Water-Purifier"] as MonsterData
 	if purifier != null and _is_valid_role_monster(purifier, "Water-Purifier"):
 		has_purifier = true
 

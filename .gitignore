@@ -42,6 +42,10 @@ dist/
 .godot/
 *.translation
 export_presets.cfg
+*.uid
+addons/
+reports/
+run_logs_2.txt
 # Uncomment if using Godot:
 # *.import
 

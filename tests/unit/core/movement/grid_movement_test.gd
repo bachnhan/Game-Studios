@@ -25,7 +25,7 @@ class TestMapContext:
 var player: GridPlayer
 var map: TestMapContext
 
-func before_each() -> void:
+func before_test() -> void:
 	player = GridPlayer.new()
 	map = TestMapContext.new()
 	player.map_context = map
@@ -34,9 +34,8 @@ func before_each() -> void:
 	player.facing_direction = Vector2i.DOWN
 	player._ready()
 
-func after_each() -> void:
+func after_test() -> void:
 	player.free()
-	map.free()
 
 func test_tap_turn_updates_direction_in_place() -> void:
 	# Arrange - Player faces DOWN. Press RIGHT key.
@@ -47,8 +46,8 @@ func test_tap_turn_updates_direction_in_place() -> void:
 	
 	# Assert - State is TURNING, look direction is RIGHT, grid position is unchanged
 	assert_int(player.current_state).is_equal(GridPlayer.State.TURNING)
-	assert_str(player.facing_direction).is_equal(Vector2i(1, 0))
-	assert_str(player.grid_position).is_equal(Vector2i(0, 0))
+	assert_str(str(player.facing_direction)).is_equal(str(Vector2i(1, 0)))
+	assert_str(str(player.grid_position)).is_equal(str(Vector2i(0, 0)))
 	
 	# Act - Simulate release of key before TURN_TAP_THRESHOLD (0.10s)
 	player.test_input = Vector2i.ZERO
@@ -56,8 +55,8 @@ func test_tap_turn_updates_direction_in_place() -> void:
 	
 	# Assert - Returns to IDLE, looking RIGHT, still on (0, 0)
 	assert_int(player.current_state).is_equal(GridPlayer.State.IDLE)
-	assert_str(player.facing_direction).is_equal(Vector2i(1, 0))
-	assert_str(player.grid_position).is_equal(Vector2i(0, 0))
+	assert_str(str(player.facing_direction)).is_equal(str(Vector2i(1, 0)))
+	assert_str(str(player.grid_position)).is_equal(str(Vector2i(0, 0)))
 
 func test_held_input_initiates_step_and_translates() -> void:
 	# Arrange - Player faces DOWN. Press and hold DOWN key.
@@ -68,44 +67,44 @@ func test_held_input_initiates_step_and_translates() -> void:
 	
 	# Assert - Transitioned directly to MOVING towards (0, 1)
 	assert_int(player.current_state).is_equal(GridPlayer.State.MOVING)
-	assert_str(player.target_position).is_equal(Vector2i(0, 1))
-	assert_str(player.grid_position).is_equal(Vector2i(0, 0))
+	assert_str(str(player.target_position)).is_equal(str(Vector2i(0, 1)))
+	assert_str(str(player.grid_position)).is_equal(str(Vector2i(0, 0)))
 	
 	# Act - Simulate time stepping forward (0.20s out of 0.25s duration)
 	player._process(0.20)
 	assert_int(player.current_state).is_equal(GridPlayer.State.MOVING)
-	assert_float(player.move_percent).is_equal(0.88)
+	assert_float(player.move_percent).is_equal(0.80)
 	
 	# Act - Advance past completion
 	player._process(0.05)
 	
 	# Assert - Arrived at (0, 1) and since key is still held, immediately starts next step to (0, 2)
-	assert_str(player.grid_position).is_equal(Vector2i(0, 1))
+	assert_str(str(player.grid_position)).is_equal(str(Vector2i(0, 1)))
 	assert_int(player.current_state).is_equal(GridPlayer.State.MOVING)
-	assert_str(player.target_position).is_equal(Vector2i(0, 2))
+	assert_str(str(player.target_position)).is_equal(str(Vector2i(0, 2)))
 
 func test_obstacle_collision_blocks_movement_and_triggers_bump() -> void:
 	# Arrange - Set (0, 1) as blocked/unwalkable
 	map.unwalkable_tiles.append(Vector2i(0, 1))
 	player.test_input = Vector2i(0, 1) # DOWN
 	
-	var bump_emitted := false
-	player.bump_triggered.connect(func(pos, dir): bump_emitted = true)
+	var bump_emitted := [false]
+	player.bump_triggered.connect(func(pos, dir): bump_emitted[0] = true)
 	
 	# Act - Start move
 	player._process(0.02)
 	
 	# Assert - Entered BLOCKED state, bump emitted, coordinates remain (0, 0)
 	assert_int(player.current_state).is_equal(GridPlayer.State.BLOCKED)
-	assert_bool(bump_emitted).is_true()
-	assert_str(player.grid_position).is_equal(Vector2i(0, 0))
+	assert_bool(bump_emitted[0]).is_true()
+	assert_str(str(player.grid_position)).is_equal(str(Vector2i(0, 0)))
 	
 	# Act - Let bump animation finish (0.15s)
 	player._process(0.15)
 	
 	# Assert - State resets to IDLE
 	assert_int(player.current_state).is_equal(GridPlayer.State.IDLE)
-	assert_str(player.grid_position).is_equal(Vector2i(0, 0))
+	assert_str(str(player.grid_position)).is_equal(str(Vector2i(0, 0)))
 
 func test_ledge_hop_bypasses_collision_and_lands_two_tiles_away() -> void:
 	# Arrange - Set (0, 1) as a downward ledge, and make (0, 1) also technically blocked
@@ -114,22 +113,22 @@ func test_ledge_hop_bypasses_collision_and_lands_two_tiles_away() -> void:
 	map.unwalkable_tiles.append(Vector2i(0, 1))
 	player.test_input = Vector2i(0, 1) # DOWN
 	
-	var hop_emitted := false
-	player.ledge_hopped.connect(func(start, end): hop_emitted = true)
+	var hop_emitted := [false]
+	player.ledge_hopped.connect(func(start, end): hop_emitted[0] = true)
 	
 	# Act - Press DOWN facing the ledge
 	player._process(0.02)
 	
 	# Assert - Entered LEDGE_HOPPING state, targeting (0, 2), bypassing collision
 	assert_int(player.current_state).is_equal(GridPlayer.State.LEDGE_HOPPING)
-	assert_bool(hop_emitted).is_true()
-	assert_str(player.target_position).is_equal(Vector2i(0, 2))
+	assert_bool(hop_emitted[0]).is_true()
+	assert_str(str(player.target_position)).is_equal(str(Vector2i(0, 2)))
 	
 	# Act - Let jump finish (0.35s)
 	player._process(0.35)
 	
 	# Assert - Landed at (0, 2)
-	assert_str(player.grid_position).is_equal(Vector2i(0, 2))
+	assert_str(str(player.grid_position)).is_equal(str(Vector2i(0, 2)))
 	assert_int(player.current_state).is_equal(GridPlayer.State.IDLE)
 
 func test_input_buffering_queues_consecutive_steps() -> void:
@@ -143,20 +142,20 @@ func test_input_buffering_queues_consecutive_steps() -> void:
 	player._process(0.02) # still moving DOWN
 	
 	# Assert - Buffer should not trigger yet (move_percent < 0.8)
-	assert_str(player.buffered_input).is_equal(Vector2i.ZERO)
+	assert_str(str(player.buffered_input)).is_equal(str(Vector2i.ZERO))
 	
 	# Act - Move past 80% mark
-	player._process(0.08) # move_percent = 0.88
+	player._process(0.08) # move_percent = 0.80
 	player._process(0.01)
 	
 	# Assert - Now inside buffering window, RIGHT is queued
-	assert_str(player.buffered_input).is_equal(Vector2i(1, 0))
+	assert_str(str(player.buffered_input)).is_equal(str(Vector2i(1, 0)))
 	
 	# Act - Complete step
 	player._process(0.05)
 	
 	# Assert - Immediately enters next step moving RIGHT from (0, 1) to (1, 1) without stalling
-	assert_str(player.grid_position).is_equal(Vector2i(0, 1))
+	assert_str(str(player.grid_position)).is_equal(str(Vector2i(0, 1)))
 	assert_int(player.current_state).is_equal(GridPlayer.State.MOVING)
-	assert_str(player.target_position).is_equal(Vector2i(1, 1))
-	assert_str(player.facing_direction).is_equal(Vector2i(1, 0))
+	assert_str(str(player.target_position)).is_equal(str(Vector2i(1, 1)))
+	assert_str(str(player.facing_direction)).is_equal(str(Vector2i(1, 0)))

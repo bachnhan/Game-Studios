@@ -101,9 +101,7 @@ func execute_round() -> void:
 	
 	# 2. Sort actions by speed descending. Speed ties are randomized.
 	all_actions.sort_custom(func(a: BattleAction, b: BattleAction) -> bool:
-		if a.actor.base_speed != b.actor.base_speed:
-			return a.actor.base_speed > b.actor.base_speed
-		return randf() < 0.5
+		return a.actor.base_speed > b.actor.base_speed
 	)
 	
 	# 3. Resolve actions sequentially
