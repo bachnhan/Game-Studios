@@ -181,6 +181,68 @@ formulas:
     added: 2026-05-28
     revised: ""
 
+  - name: battle_damage_calculation
+    status: active
+    source: design/gdd/battle-engine.md
+    referenced_by:
+      - design/gdd/battle-engine.md
+      - design/gdd/battle-ui.md
+    variables:
+      - base_power
+      - attacker_attack
+      - defender_defense
+      - stance_multiplier
+      - combat_stat_modifier
+    output_range: [1, 999]
+    expression: "base_power * (attacker_attack / defender_defense) * stance_multiplier * combat_stat_modifier"
+    notes: "Calculates damage dealt in combat. Clamped to minimum of 1 and maximum of 999."
+    added: 2026-05-28
+    revised: ""
+
+  - name: cooking_quality_score
+    status: active
+    source: design/gdd/camp-manager.md
+    referenced_by:
+      - design/gdd/camp-manager.md
+    variables:
+      - base_efficiency
+      - minigame_accuracy
+    output_range: [0.4, 1.8]
+    expression: "base_efficiency * minigame_accuracy"
+    notes: "Determines meal quality outcome based on helper and player accuracy."
+    added: 2026-05-28
+    revised: ""
+
+  - name: camp_fatigue_recovery
+    status: active
+    source: design/gdd/camp-manager.md
+    referenced_by:
+      - design/gdd/camp-manager.md
+      - design/gdd/bond-manager.md
+    variables:
+      - base_rate
+      - fire_multiplier
+      - ward_multiplier
+    output_range: [25, 45]
+    expression: "base_rate * fire_multiplier * ward_multiplier"
+    notes: "Calculates fatigue restored to a monster resting in the tent."
+    added: 2026-05-28
+    revised: ""
+
+  - name: hp_bar_width_interpolation
+    status: active
+    source: design/gdd/battle-ui.md
+    referenced_by:
+      - design/gdd/battle-ui.md
+    variables:
+      - current_hp
+      - base_hp
+    output_range: [0.0, 1.0]
+    expression: "current_hp / base_hp"
+    notes: "Calculates the visual health bar fill ratio."
+    added: 2026-05-28
+    revised: ""
+
 # Example:
 #
 # formulas:
@@ -322,6 +384,60 @@ constants:
       - design/gdd/grid-movement.md
     value: 0.35
     unit: probability
+    added: 2026-05-28
+    revised: ""
+
+  - name: counter_multiplier
+    status: active
+    source: design/gdd/battle-engine.md
+    referenced_by:
+      - design/gdd/battle-engine.md
+      - design/gdd/wild-ai.md
+    value: 2.0
+    unit: multiplier
+    added: 2026-05-28
+    revised: ""
+
+  - name: round_fatigue_gain
+    status: active
+    source: design/gdd/battle-engine.md
+    referenced_by:
+      - design/gdd/battle-engine.md
+      - design/gdd/bond-manager.md
+    value: 10
+    unit: fatigue points
+    added: 2026-05-28
+    revised: ""
+
+  - name: base_recovery_rate
+    status: active
+    source: design/gdd/camp-manager.md
+    referenced_by:
+      - design/gdd/camp-manager.md
+      - design/gdd/bond-manager.md
+    value: 25
+    unit: fatigue points
+    added: 2026-05-28
+    revised: ""
+
+  - name: camp_fire_max_fuel
+    status: active
+    source: design/gdd/camp-manager.md
+    referenced_by:
+      - design/gdd/camp-manager.md
+      - design/gdd/save-manager.md
+    value: 120.0
+    unit: seconds
+    added: 2026-05-28
+    revised: ""
+
+  - name: hp_bar_tween_duration
+    status: active
+    source: design/gdd/battle-ui.md
+    referenced_by:
+      - design/gdd/battle-ui.md
+    value: 0.5
+    unit: seconds
     added: 2026-05-28
     revised: ""
 

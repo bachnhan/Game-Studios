@@ -1,14 +1,14 @@
 <!-- STATUS -->
 Epic: Hearth & Horn Conception
 Feature: Systems Decomposition
-Task: Designing BattleEngine GDD
+Task: Systems Design Review & Gate Check
 <!-- /STATUS -->
 
 # Active Session State
 
 ## Current Task
-- **Task**: Designing BattleEngine GDD
-- **Status**: Not Started
+- **Task**: Systems Design Review & Gate Check
+- **Status**: All 6 MVP Systems Designed
 - **Active File**: [systems-index.md](file:///Users/cation/Game-Studios/design/gdd/systems-index.md)
 
 ## Current Stage Context
@@ -17,4 +17,4 @@ Task: Designing BattleEngine GDD
 - **Engine**: Godot 4.6.3 (GDScript)
 
 ## Next Action
-- Design the fourth MVP system: `BattleEngine` (use `/design-system BattleEngine`)
+- Run design gate checking, then proceed to Phase 3: Technical Setup (Architecture & ADRs)

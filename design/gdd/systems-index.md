@@ -20,9 +20,9 @@ Hearth & Horn is a cozy, grid-based travel and camping adventure. To support thi
 | 1 | `MonsterData` | Gameplay | MVP | Designed | [monster-data.md](file:///Users/cation/Game-Studios/design/gdd/monster-data.md) | None |
 | 2 | `InventorySystem` | Economy | MVP | Designed | [inventory-system.md](file:///Users/cation/Game-Studios/design/gdd/inventory-system.md) | None |
 | 3 | `GridMovement` | Core | MVP | Designed | [grid-movement.md](file:///Users/cation/Game-Studios/design/gdd/grid-movement.md) | `SaveManager` (Optional for MVP) |
-| 4 | `BattleEngine` | Gameplay | MVP | Not Started | — | `MonsterData` |
-| 5 | `CampManager` | Gameplay | MVP | Not Started | — | `InventorySystem`, `RecipeDatabase` (Placeholder) |
-| 6 | `BattleUI` | UI | MVP | Not Started | — | `BattleEngine` |
+| 4 | `BattleEngine` | Gameplay | MVP | Designed | [battle-engine.md](file:///Users/cation/Game-Studios/design/gdd/battle-engine.md) | `MonsterData` |
+| 5 | `CampManager` | Gameplay | MVP | Designed | [camp-manager.md](file:///Users/cation/Game-Studios/design/gdd/camp-manager.md) | `InventorySystem`, `RecipeDatabase` (Placeholder) |
+| 6 | `BattleUI` | UI | MVP | Designed | [battle-ui.md](file:///Users/cation/Game-Studios/design/gdd/battle-ui.md) | `BattleEngine` |
 | 7 | `SaveManager` (inferred) | Persistence | Vertical Slice | Not Started | — | None |
 | 8 | `BondManager` (inferred) | Gameplay | Vertical Slice | Not Started | — | `MonsterData`, `SaveManager` |
 | 9 | `RecipeDatabase` (inferred) | Economy | Vertical Slice | Not Started | — | `InventorySystem`, `SaveManager` |
@@ -128,10 +128,10 @@ This is the order in which we will write the Game Design Documents (GDDs).
 | Metric | Count |
 |--------|-------|
 | Total systems identified | 13 |
-| Design docs started | 3 |
+| Design docs started | 6 |
 | Design docs reviewed | 0 |
 | Design docs approved | 0 |
-| MVP systems designed | 3/6 |
+| MVP systems designed | 6/6 |
 | Vertical Slice systems designed | 0/5 |
 
 ---
