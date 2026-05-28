@@ -77,7 +77,33 @@ entities: []
 # Attribute fields: value_gold, weight, stackable, category, and any stat
 #   modifiers that another system (e.g., economy, crafting) might reference.
 
-items: []
+items:
+  - name: item_berry_cozy
+    status: active
+    source: design/gdd/inventory-system.md
+    referenced_by:
+      - design/gdd/inventory-system.md
+      - design/gdd/camp-manager.md
+      - design/gdd/recipe-database.md
+    value_gold: 0
+    weight: 0.1
+    stackable: true
+    category: Ingredient
+    added: 2026-05-28
+    revised: ""
+
+  - name: item_wood
+    status: active
+    source: design/gdd/inventory-system.md
+    referenced_by:
+      - design/gdd/inventory-system.md
+      - design/gdd/camp-manager.md
+    value_gold: 0
+    weight: 1.0
+    stackable: true
+    category: Fuel
+    added: 2026-05-28
+    revised: ""
 
 # Example:
 #
@@ -213,6 +239,29 @@ constants:
       - design/gdd/field-hazards.md
     value: 5
     unit: fatigue points
+    added: 2026-05-28
+    revised: ""
+
+  - name: base_inventory_slots
+    status: active
+    source: design/gdd/inventory-system.md
+    referenced_by:
+      - design/gdd/inventory-system.md
+      - design/gdd/save-manager.md
+      - design/gdd/ui.md
+    value: 20
+    unit: slots
+    added: 2026-05-28
+    revised: ""
+
+  - name: max_stack_size
+    status: active
+    source: design/gdd/inventory-system.md
+    referenced_by:
+      - design/gdd/inventory-system.md
+      - design/gdd/save-manager.md
+    value: 99
+    unit: items per stack
     added: 2026-05-28
     revised: ""
 
